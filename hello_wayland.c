@@ -579,7 +579,7 @@ loopy:
     avcodec_free_context(&decoder_ctx);
     avformat_close_input(&input_ctx);
 
-    if (--loop_count > 0)
+    if (--loop_count != 0)
         goto loopy;
 
     egl_wayland_out_delete(dpo);
