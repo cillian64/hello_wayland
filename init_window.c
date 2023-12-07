@@ -112,8 +112,8 @@ struct dmabuf_w_env_s {
 };
 
 
-#define WINDOW_WIDTH 1280
-#define WINDOW_HEIGHT 720
+#define WINDOW_WIDTH 1920
+#define WINDOW_HEIGHT 1080
 
 
 // Remove any params from a modifier
