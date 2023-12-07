@@ -1225,8 +1225,9 @@ wayland_out_new(const bool is_egl, const unsigned int flags)
 
     if (!wc->decoration_manager) {
         LOG("No decoration manager\n");
-    }
-    else {
+    } else if ((flags & WOUT_FLAG_FULLSCREEN) != 0) {
+        LOG("No decorations in fullscreen mode\n");
+    } else {
         struct zxdg_toplevel_decoration_v1 *decoration =
             zxdg_decoration_manager_v1_get_toplevel_decoration(wc->decoration_manager, wc->wm_toplevel);
         zxdg_toplevel_decoration_v1_add_listener(decoration, &decoration_listener, wc);
