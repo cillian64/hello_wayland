@@ -67,6 +67,8 @@ typedef struct window_ctx_s {
     struct wp_viewport *viewport;
     struct xdg_surface *wm_surface;
     struct xdg_toplevel *wm_toplevel;
+    struct wl_seat *seat;
+    struct wl_pointer *pointer;
 
     struct wl_callback *frame_callback;
 
@@ -898,6 +900,86 @@ static struct zxdg_toplevel_decoration_v1_listener decoration_listener = {
 
 // ---------------------------------------------------------------------------
 
+void pointer_enter_handler(
+    void *data,
+    struct wl_pointer *pointer,
+    uint32_t serial,
+    struct wl_surface *surface,
+    wl_fixed_t x,
+    wl_fixed_t y
+) {
+    (void)data;
+    (void)surface;
+    (void)x;
+    (void)y;
+    // Hide the cursor as soon as it enters our window
+    wl_pointer_set_cursor(pointer, serial, NULL, 0, 0);
+}
+
+void pointer_leave_handler (
+    void *data,
+    struct wl_pointer *pointer,
+    uint32_t serial,
+    struct wl_surface *surface
+) {
+    (void)data;
+    (void)pointer;
+    (void)serial;
+    (void)surface;
+}
+
+void pointer_motion_handler(
+    void *data,
+    struct wl_pointer *pointer,
+    uint32_t time,
+    wl_fixed_t x,
+    wl_fixed_t y
+) {
+    (void)data;
+    (void)pointer;
+    (void)time;
+    (void)x;
+    (void)y;
+}
+
+void pointer_button_handler(
+    void *data,
+    struct wl_pointer *pointer,
+    uint32_t serial,
+    uint32_t time,
+    uint32_t button,
+    uint32_t state
+) {
+    (void)data;
+    (void)pointer;
+    (void)serial;
+    (void)time;
+    (void)button;
+    (void)state;
+}
+
+void pointer_axis_handler(
+    void *data,
+    struct wl_pointer *pointer,
+    uint32_t time,
+    uint32_t axis,
+    wl_fixed_t value
+) {
+    (void)data;
+    (void)pointer;
+    (void)time;
+    (void)axis;
+    (void)value;
+}
+
+const struct wl_pointer_listener pointer_listener = {
+    .enter = pointer_enter_handler,
+    .leave = pointer_leave_handler,
+    .motion = pointer_motion_handler,
+    .button = pointer_button_handler,
+    .axis = pointer_axis_handler
+};
+
 static void
 global_registry_handler(void *data, struct wl_registry *registry, uint32_t id,
                                     const char *interface, uint32_t version)
@@ -929,6 +1011,11 @@ global_registry_handler(void *data, struct wl_registry *registry, uint32_t id,
         wc->decoration_manager = wl_registry_bind(registry, id, &zxdg_decoration_manager_v1_interface, 1);
     if (strcmp(interface, wp_viewporter_interface.name) == 0)
         wc->viewporter = wl_registry_bind(registry, id, &wp_viewporter_interface, 1);
+    if (strcmp(interface, wl_seat_interface.name) == 0) {
+        wc->seat = wl_registry_bind(registry, id, &wl_seat_interface, 1);
+        wc->pointer = wl_seat_get_pointer(wc->seat);
+        wl_pointer_add_listener(wc->pointer, &pointer_listener, data);
+    }
 }
 
 static void
